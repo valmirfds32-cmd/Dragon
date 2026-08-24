@@ -31,6 +31,12 @@
       width: 100%;
     }
 
+    .image-container {
+      position: relative;
+      width: 100%;
+      display: inline-block;
+    }
+
     .image-container img {
       width: 100%;
       height: auto;
@@ -40,10 +46,14 @@
     }
 
     .button-group {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       display: flex;
       gap: 15px;
       justify-content: center;
-      width: 100%;
+      width: auto;
     }
 
     .btn {
@@ -83,13 +93,11 @@
 
   <div class="container">
     <div class="image-container">
-      <!-- Substitua 'dragao.jpeg' pelo caminho final do seu arquivo de imagem -->
       <img src="dragao1.jpeg" alt="Dragões em combate">
-    </div>
-
-    <div class="button-group">
-      <button class="btn btn-play">Jogar</button>
-      <button class="btn btn-edit">Editar dragão</button>
+      <div class="button-group">
+        <button class="btn btn-play">Jogar</button>
+        <button class="btn btn-edit">Editar dragão</button>
+      </div>
     </div>
   </div>
 
