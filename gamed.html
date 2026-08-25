@@ -54,6 +54,7 @@
       gap: 15px;
       justify-content: center;
       width: auto;
+      z-index: 10;
     }
 
     .btn {
@@ -87,19 +88,72 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(42, 157, 143, 0.4);
     }
+
+    /* Estilos para o modo jogo */
+    .character {
+      position: absolute;
+      width: auto;
+      height: auto;
+      z-index: 5;
+    }
+
+    .cave-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 15;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="image-container">
-      <img src="dragao1.jpeg" alt="Dragões em combate">
-      <div class="button-group">
-        <button class="btn btn-play">Jogar</button>
+    <div class="image-container" id="gameContainer">
+      <img id="mainImage" src="dragao1.jpeg" alt="Dragões em combate">
+      <div class="button-group" id="buttonGroup">
+        <button class="btn btn-play" id="playBtn">Jogar</button>
         <button class="btn btn-edit">Editar dragão</button>
       </div>
     </div>
   </div>
+
+  <script>
+    const playBtn = document.getElementById('playBtn');
+    const gameContainer = document.getElementById('gameContainer');
+    const mainImage = document.getElementById('mainImage');
+    const buttonGroup = document.getElementById('buttonGroup');
+
+    playBtn.addEventListener('click', function() {
+      // Muda a imagem principal para cave.jpeg
+      mainImage.src = 'cave.jpeg';
+      mainImage.alt = 'Caverna';
+      
+      // Esconde os botões
+      buttonGroup.style.display = 'none';
+      
+      // Remove imagens overlay anteriores se existirem
+      const existingOverlays = gameContainer.querySelectorAll('.character, .cave-overlay');
+      existingOverlays.forEach(el => el.remove());
+      
+      // Adiciona a imagem seqd.pgn na posição x:30, y:100
+      const seqdImage = document.createElement('img');
+      seqdImage.src = 'seqd.pgn';
+      seqdImage.alt = 'Personagem';
+      seqdImage.className = 'character';
+      seqdImage.style.left = '30px';
+      seqdImage.style.top = '100px';
+      gameContainer.appendChild(seqdImage);
+      
+      // Adiciona cave1.pgn na mesma posição (sobreposto)
+      const caveOverlay = document.createElement('img');
+      caveOverlay.src = 'cave1.pgn';
+      caveOverlay.alt = 'Sobreposição da caverna';
+      caveOverlay.className = 'cave-overlay';
+      gameContainer.appendChild(caveOverlay);
+    });
+  </script>
 
 </body>
 </html>
