@@ -95,7 +95,6 @@
       width: auto;
       height: auto;
       z-index: 5;
-      transition: top 1s ease-in-out;
     }
 
     .cave-overlay {
@@ -154,10 +153,10 @@
       caveOverlay.className = 'cave-overlay';
       gameContainer.appendChild(caveOverlay);
       
-      // Inicia a animação de alternância entre 390px e 130px a cada 1 segundo
+      // Inicia a animação de alternância entre 390px e 90px a cada 1 segundo
       let isTop390 = true;
       setInterval(function() {
-        seqdImage.style.top = isTop390 ? '130px' : '390px';
+        seqdImage.style.top = isTop390 ? '90px' : '390px';
         isTop390 = !isTop390;
       }, 1000);
     });
