@@ -105,6 +105,62 @@
       height: 100%;
       z-index: 15;
     }
+
+    /* Estilos do Gauge de Carregamento */
+    .loading-gauge-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      z-index: 20;
+      background-color: rgba(18, 18, 18, 0.95);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    }
+
+    .loading-gauge-container.active {
+      display: flex;
+    }
+
+    .gauge-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #e63946;
+    }
+
+    .gauge-bar {
+      width: 250px;
+      height: 30px;
+      background-color: #2a2a2a;
+      border-radius: 15px;
+      overflow: hidden;
+      border: 2px solid #e63946;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #e63946, #d62839);
+      transition: width 0.1s linear;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .gauge-percent {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      color: #ffffff;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -116,6 +172,15 @@
         <button class="btn btn-play" id="playBtn">Jogar</button>
         <button class="btn btn-edit">Editar dragão</button>
       </div>
+
+      <!-- Gauge de Carregamento -->
+      <div class="loading-gauge-container" id="loadingGaugeContainer">
+        <div class="gauge-title">Carregando...</div>
+        <div class="gauge-bar">
+          <div class="gauge-fill" id="gaugeFill"></div>
+        </div>
+        <div class="gauge-percent" id="gaugePercent">0%</div>
+      </div>
     </div>
   </div>
 
@@ -124,42 +189,84 @@
     const gameContainer = document.getElementById('gameContainer');
     const mainImage = document.getElementById('mainImage');
     const buttonGroup = document.getElementById('buttonGroup');
+    const loadingGaugeContainer = document.getElementById('loadingGaugeContainer');
+    const gaugeFill = document.getElementById('gaugeFill');
+    const gaugePercent = document.getElementById('gaugePercent');
 
-    playBtn.addEventListener('click', function() {
-      // Muda a imagem principal para cave.jpeg
-      mainImage.src = 'cave.jpeg';
-      mainImage.alt = 'Caverna';
-      
-      // Esconde os botões
+    // Função para pré-carregar uma imagem
+    function preloadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(src);
+        img.onerror = () => reject(new Error(`Erro ao carregar: ${src}`));
+        img.src = src;
+      });
+    }
+
+    // Função para atualizar o gauge
+    function updateGauge(percent) {
+      gaugeFill.style.width = percent + '%';
+      gaugePercent.textContent = Math.round(percent) + '%';
+    }
+
+    playBtn.addEventListener('click', async function() {
+      // Mostra o gauge de carregamento
+      loadingGaugeContainer.classList.add('active');
       buttonGroup.style.display = 'none';
-      
-      // Remove imagens overlay anteriores se existirem
-      const existingOverlays = gameContainer.querySelectorAll('.character, .cave-overlay');
-      existingOverlays.forEach(el => el.remove());
-      
-      // Adiciona a imagem seqd.pgn na posição x:30, y:100
-      const seqdImage = document.createElement('img');
-      seqdImage.src = 'seqd.png';
-      seqdImage.alt = 'Personagem';
-      seqdImage.className = 'character';
-      seqdImage.style.left = '30px';
-      seqdImage.style.top = '-3000px';
-      gameContainer.appendChild(seqdImage);
-      
-      // Adiciona cave1.pgn na mesma posição (sobreposto)
-      const caveOverlay = document.createElement('img');
-      caveOverlay.src = 'cave1.png';
-      caveOverlay.alt = 'Sobreposição da caverna';
-      caveOverlay.style.top = '0px';
-      caveOverlay.className = 'cave-overlay';
-      gameContainer.appendChild(caveOverlay);
-      
-      // Inicia a animação de alternância entre 390px e 90px a cada 1 segundo
-      //let isTop390 = true;
-      //setInterval(function() {
-       // seqdImage.style.top = isTop390 ? '-490px' : '390px';
-       // isTop390 = !isTop390;
-      //}, 1000);
+
+      // Lista de imagens a carregar
+      const imagesToLoad = ['cave.jpeg', 'seqd.png', 'cave1.png'];
+      let loadedCount = 0;
+
+      try {
+        // Carrega todas as imagens
+        for (const imageSrc of imagesToLoad) {
+          await preloadImage(imageSrc);
+          loadedCount++;
+          const progressPercent = (loadedCount / imagesToLoad.length) * 100;
+          updateGauge(progressPercent);
+          
+          // Pequeno delay para visualizar o progresso
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
+        // Aguarda mais um pouco para o gauge chegar a 100%
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Esconde o gauge
+        loadingGaugeContainer.classList.remove('active');
+
+        // Remove imagens overlay anteriores se existirem
+        const existingOverlays = gameContainer.querySelectorAll('.character, .cave-overlay');
+        existingOverlays.forEach(el => el.remove());
+
+        // Muda a imagem principal para cave.jpeg
+        mainImage.src = 'cave.jpeg';
+        mainImage.alt = 'Caverna';
+
+        // Adiciona a imagem seqd.png na posição x:30, y:100
+        const seqdImage = document.createElement('img');
+        seqdImage.src = 'seqd.png';
+        seqdImage.alt = 'Personagem';
+        seqdImage.className = 'character';
+        seqdImage.style.left = '30px';
+        seqdImage.style.top = '-3000px';
+        gameContainer.appendChild(seqdImage);
+
+        // Adiciona cave1.png na mesma posição (sobreposto)
+        const caveOverlay = document.createElement('img');
+        caveOverlay.src = 'cave1.png';
+        caveOverlay.alt = 'Sobreposição da caverna';
+        caveOverlay.style.top = '0px';
+        caveOverlay.className = 'cave-overlay';
+        gameContainer.appendChild(caveOverlay);
+
+      } catch (error) {
+        console.error('Erro ao carregar imagens:', error);
+        loadingGaugeContainer.classList.remove('active');
+        alert('Erro ao carregar as imagens do jogo. Tente novamente.');
+        buttonGroup.style.display = 'flex';
+      }
     });
   </script>
 
