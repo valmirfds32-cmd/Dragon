@@ -161,6 +161,18 @@
       color: #ffffff;
       font-weight: bold;
     }
+
+    /* Estilo específico para o botão de ataque (imagem) */
+    #botatk {
+      position: absolute;
+      left: 20px;
+      top: 140px;
+      width: 80px;
+      height: auto;
+      z-index: 25;
+      cursor: pointer;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -214,8 +226,8 @@
       loadingGaugeContainer.classList.add('active');
       buttonGroup.style.display = 'none';
 
-      // Lista de imagens a carregar
-      const imagesToLoad = ['cave.jpeg', 'seqd.png', 'cave1.png'];
+      // Lista de imagens a carregar (agora incluindo maof/maoa/maor)
+      const imagesToLoad = ['cave.jpeg', 'seqd.png', 'cave1.png', 'maof.png', 'maoa.png', 'maor.png'];
       let loadedCount = 0;
 
       try {
@@ -227,7 +239,7 @@
           updateGauge(progressPercent);
           
           // Pequeno delay para visualizar o progresso
-          await new Promise(resolve => setTimeout(resolve, 300));
+n          await new Promise(resolve => setTimeout(resolve, 300));
         }
 
         // Aguarda mais um pouco para o gauge chegar a 100%
@@ -260,6 +272,28 @@
         caveOverlay.style.top = '-20px';
         caveOverlay.className = 'cave-overlay';
         gameContainer.appendChild(caveOverlay);
+
+        // Cria o botão de ataque com forma de imagem (maoa.png) na posição x:20, y:140
+        const botatk = document.createElement('img');
+        botatk.id = 'botatk';
+        botatk.src = 'maoa.png';
+        botatk.alt = 'Botão de ataque';
+        // mantemos a classe character para que seja removido junto com outros overlays se necessário
+        botatk.className = 'character';
+        // estilos já definidos em CSS via #botatk, mas garantimos as posições caso CSS não carregue
+        botatk.style.left = '20px';
+        botatk.style.top = '140px';
+        botatk.style.width = '80px';
+        botatk.style.cursor = 'pointer';
+        botatk.style.zIndex = '25';
+        gameContainer.appendChild(botatk);
+
+        // Ao pressionar (click) muda a forma para maof.png
+        botatk.addEventListener('click', function() {
+          this.src = 'maof.png';
+        });
+
+        // (Opcional) você pode usar maor.png para um estado alternativo quando quiser — já está pré-carregada
 
       } catch (error) {
         console.error('Erro ao carregar imagens:', error);
