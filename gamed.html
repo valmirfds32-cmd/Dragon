@@ -239,7 +239,7 @@
           updateGauge(progressPercent);
           
           // Pequeno delay para visualizar o progresso
-n          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
 
         // Aguarda mais um pouco para o gauge chegar a 100%
@@ -278,7 +278,7 @@ n          await new Promise(resolve => setTimeout(resolve, 300));
         botatk.id = 'botatk';
         botatk.src = 'maoa.png';
         botatk.alt = 'Botão de ataque';
-        // mantemos a classe character para que seja removido junto com outros overlays se necessário
+        // mantemos a classe character para que seja removido junto com outros overlays quando necessário
         botatk.className = 'character';
         // estilos já definidos em CSS via #botatk, mas garantimos as posições caso CSS não carregue
         botatk.style.left = '20px';
@@ -288,9 +288,21 @@ n          await new Promise(resolve => setTimeout(resolve, 300));
         botatk.style.zIndex = '25';
         gameContainer.appendChild(botatk);
 
-        // Ao pressionar (click) muda a forma para maof.png
+        // Ao pressionar (click) muda a forma para maof.png e retorna para maoa.png após 500ms
         botatk.addEventListener('click', function() {
-          this.src = 'maof.png';
+          const el = this;
+          // evita clicar várias vezes enquanto a animação/tempo estiver em andamento
+          if (el.dataset.locked === 'true') return;
+          el.dataset.locked = 'true';
+          el.src = 'maof.png';
+          // volta ao estado original após 500ms
+          const timeoutId = setTimeout(() => {
+            el.src = 'maoa.png';
+            el.dataset.locked = 'false';
+            delete el.dataset._atkTimeout;
+          }, 500);
+          // guarda o id caso precise limpar futuramente
+          el.dataset._atkTimeout = timeoutId;
         });
 
         // (Opcional) você pode usar maor.png para um estado alternativo quando quiser — já está pré-carregada
