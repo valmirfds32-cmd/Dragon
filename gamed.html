@@ -21,6 +21,10 @@
       align-items: center;
     }
 
+    body.game-active {
+      overflow: hidden;
+    }
+
     .container {
       display: flex;
       flex-direction: column;
@@ -348,6 +352,9 @@
           // guarda o id caso precise limpar futuramente
           el.dataset._magTimeout = timeoutId;
         });
+
+        // Desabilita o scroll adicionando a classe ao body
+        document.body.classList.add('game-active');
 
         // (Opcional) você pode usar maor.png para um estado alternativo quando quiser — já está pré-carregada
 
