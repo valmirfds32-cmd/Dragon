@@ -190,6 +190,133 @@
       cursor: pointer;
       user-select: none;
     }
+
+    /* Gauges de vitalidade */
+    .hp-gauge {
+      position: absolute;
+      width: 220px;
+      z-index: 30;
+      background: rgba(15, 15, 15, 0.9);
+      padding: 8px 10px 10px;
+      border-radius: 10px;
+      border: 2px solid;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .hp-gauge-title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .hp-bar {
+      width: 100%;
+      height: 20px;
+      background: #2f2f2f;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #555;
+    }
+
+    .hp-fill {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #ffffff;
+      transition: width 0.3s ease;
+    }
+
+    #meuvit {
+      left: 600px;
+      top: 100px;
+      border-color: #2a9d8f;
+    }
+
+    #bossvit {
+      left: 10px;
+      top: 100px;
+      border-color: #e63946;
+    }
+
+    #meuvit .hp-fill {
+      background: linear-gradient(90deg, #3ecf8e, #2a9d8f);
+    }
+
+    #bossvit .hp-fill {
+      background: linear-gradient(90deg, #ff4d4d, #e63946);
+    }
+
+    .dice-label {
+      position: absolute;
+      left: 100px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #ffffff;
+      background: rgba(18, 18, 18, 0.8);
+      border: 2px solid #2a9d8f;
+      padding: 8px 14px;
+      border-radius: 8px;
+      z-index: 30;
+    }
+
+    #dado1 { top: 500px; }
+    #dado2 { top: 600px; }
+
+    .screen-flash {
+      animation: flash 0.3s ease-in-out;
+    }
+
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .character-red-flash {
+      animation: redflash 0.3s ease-in-out;
+    }
+
+    @keyframes redflash {
+      0%, 100% { filter: none; }
+      50% { filter: brightness(1.2) sepia(1) hue-rotate(-20deg) saturate(2); }
+    }
+
+    .end-screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.78);
+      z-index: 50;
+    }
+
+    .end-screen.active {
+      display: flex;
+    }
+
+    .end-screen-text {
+      font-size: 3.5rem;
+      font-weight: bold;
+      color: #e63946;
+      animation: pulse 1s infinite ease-in-out;
+      text-shadow: 0 0 25px rgba(230, 57, 70, 0.7);
+    }
+
+    .end-screen.won .end-screen-text {
+      color: #2a9d8f;
+      text-shadow: 0 0 25px rgba(42, 157, 143, 0.7);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.09); }
+    }
   </style>
 </head>
 <body>
@@ -202,13 +329,29 @@
         <button class="btn btn-edit">Editar dragão</button>
       </div>
 
-      <!-- Gauge de Carregamento -->
       <div class="loading-gauge-container" id="loadingGaugeContainer">
         <div class="gauge-title">Carregando...</div>
         <div class="gauge-bar">
           <div class="gauge-fill" id="gaugeFill"></div>
         </div>
         <div class="gauge-percent" id="gaugePercent">0%</div>
+      </div>
+
+      <div class="hp-gauge" id="meuvit">
+        <div class="hp-gauge-title">meuvit</div>
+        <div class="hp-bar"><div class="hp-fill" id="meuvitFill">3000 / 3000</div></div>
+      </div>
+
+      <div class="hp-gauge" id="bossvit">
+        <div class="hp-gauge-title">bossvit</div>
+        <div class="hp-bar"><div class="hp-fill" id="bossvitFill">5000 / 5000</div></div>
+      </div>
+
+      <div class="dice-label" id="dado1">dadomeu: 0</div>
+      <div class="dice-label" id="dado2">dadobos: 0</div>
+
+      <div class="end-screen" id="endScreen">
+        <div class="end-screen-text" id="endScreenText">Game Over</div>
       </div>
     </div>
   </div>
@@ -221,8 +364,22 @@
     const loadingGaugeContainer = document.getElementById('loadingGaugeContainer');
     const gaugeFill = document.getElementById('gaugeFill');
     const gaugePercent = document.getElementById('gaugePercent');
+    const meuvitFill = document.getElementById('meuvitFill');
+    const bossvitFill = document.getElementById('bossvitFill');
+    const dado1Label = document.getElementById('dado1');
+    const dado2Label = document.getElementById('dado2');
+    const endScreen = document.getElementById('endScreen');
+    const endScreenText = document.getElementById('endScreenText');
 
-    // Função para pré-carregar uma imagem
+    let game = {
+      meuvit: 3000,
+      maxMeuvit: 3000,
+      bossvit: 5000,
+      maxBossvit: 5000,
+      gameEnded: false,
+      turnLocked: false
+    };
+
     function preloadImage(src) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -232,48 +389,113 @@
       });
     }
 
-    // Função para atualizar o gauge
     function updateGauge(percent) {
       gaugeFill.style.width = percent + '%';
       gaugePercent.textContent = Math.round(percent) + '%';
     }
 
+    function updateHp(element, current, max) {
+      const pct = Math.max(0, (current / max) * 100);
+      element.style.width = pct + '%';
+      element.textContent = `${current} / ${max}`;
+    }
+
+    function flashScreen() {
+      gameContainer.classList.remove('screen-flash');
+      void gameContainer.offsetWidth;
+      gameContainer.classList.add('screen-flash');
+      setTimeout(() => gameContainer.classList.remove('screen-flash'), 300);
+    }
+
+    function flashCharacterRed(seqdImage) {
+      seqdImage.classList.remove('character-red-flash');
+      void seqdImage.offsetWidth;
+      seqdImage.classList.add('character-red-flash');
+      setTimeout(() => seqdImage.classList.remove('character-red-flash'), 300);
+    }
+
+    function endGame(won) {
+      game.gameEnded = true;
+      endScreen.classList.add('active');
+      if (won) {
+        endScreen.classList.add('won');
+        endScreenText.textContent = 'Você ganhou';
+      } else {
+        endScreen.classList.remove('won');
+        endScreenText.textContent = 'Game over';
+      }
+    }
+
+    function rollDice() {
+      return Math.floor(Math.random() * 6) + 1;
+    }
+
+    async function handleAttack(seqdImage) {
+      if (game.gameEnded || game.turnLocked) return;
+      game.turnLocked = true;
+
+      const dadomeu = rollDice();
+      const dadobos = rollDice();
+
+      dado1Label.textContent = `dadomeu: ${dadomeu}`;
+      dado2Label.textContent = `dadobos: ${dadobos}`;
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      if (dadobos > dadomeu) {
+        let damage = 0;
+
+        if (dadobos === 5 || dadobos === 6) {
+          damage = 50;
+        } else if (dadobos === 3 || dadobos === 4) {
+          damage = 100;
+        }
+
+        if (damage > 0) {
+          game.meuvit = Math.max(0, game.meuvit - damage);
+          updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
+          flashScreen();
+        }
+      } else if (dadomeu > dadobos) {
+        const damage = Math.floor(Math.random() * 51) + 50;
+        game.bossvit = Math.max(0, game.bossvit - damage);
+        updateHp(bossvitFill, game.bossvit, game.maxBossvit);
+        flashCharacterRed(seqdImage);
+      }
+
+      if (game.meuvit <= 0) {
+        endGame(false);
+      } else if (game.bossvit <= 0) {
+        endGame(true);
+      }
+
+      game.turnLocked = false;
+    }
+
     playBtn.addEventListener('click', async function() {
-      // Mostra o gauge de carregamento
       loadingGaugeContainer.classList.add('active');
       buttonGroup.style.display = 'none';
 
-      // Lista de imagens a carregar (agora incluindo maof/maoa/maor)
       const imagesToLoad = ['cave.jpeg', 'seqd.png', 'cave1.png', 'maof.png', 'maoa.png', 'maor.png'];
       let loadedCount = 0;
 
       try {
-        // Carrega todas as imagens
         for (const imageSrc of imagesToLoad) {
           await preloadImage(imageSrc);
           loadedCount++;
-          const progressPercent = (loadedCount / imagesToLoad.length) * 100;
-          updateGauge(progressPercent);
-          
-          // Pequeno delay para visualizar o progresso
+          updateGauge((loadedCount / imagesToLoad.length) * 100);
           await new Promise(resolve => setTimeout(resolve, 300));
         }
 
-        // Aguarda mais um pouco para o gauge chegar a 100%
         await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Esconde o gauge
         loadingGaugeContainer.classList.remove('active');
 
-        // Remove imagens overlay anteriores se existirem
         const existingOverlays = gameContainer.querySelectorAll('.character, .cave-overlay');
         existingOverlays.forEach(el => el.remove());
 
-        // Muda a imagem principal para cave.jpeg
         mainImage.src = 'cave.jpeg';
         mainImage.alt = 'Caverna';
 
-        // Adiciona a imagem seqd.png na posição x:30, y:100
         const seqdImage = document.createElement('img');
         seqdImage.src = 'seqd.png';
         seqdImage.alt = 'Personagem';
@@ -282,22 +504,18 @@
         seqdImage.style.top = '-3000px';
         gameContainer.appendChild(seqdImage);
 
-        // Adiciona cave1.png na mesma posição (sobreposto)
         const caveOverlay = document.createElement('img');
         caveOverlay.src = 'cave1.png';
         caveOverlay.alt = 'Sobreposição da caverna';
-        caveOverlay.style.top = '-20px';
         caveOverlay.className = 'cave-overlay';
+        caveOverlay.style.top = '-20px';
         gameContainer.appendChild(caveOverlay);
 
-        // Cria o botão de ataque com forma de imagem (maoa.png) na posição x:20, y:140
         const botatk = document.createElement('img');
         botatk.id = 'botatk';
         botatk.src = 'maoa.png';
         botatk.alt = 'Botão de ataque';
-        // mantemos a classe character para que seja removido junto com outros overlays quando necessário
         botatk.className = 'character';
-        // estilos já definidos em CSS via #botatk, mas garantimos as posições caso CSS não carregue
         botatk.style.left = '300px';
         botatk.style.top = '1200px';
         botatk.style.width = '80px';
@@ -305,31 +523,22 @@
         botatk.style.zIndex = '25';
         gameContainer.appendChild(botatk);
 
-        // Ao pressionar (click) muda a forma para maof.png e retorna para maoa.png após 500ms
         botatk.addEventListener('click', function() {
           const el = this;
-          // evita clicar várias vezes enquanto a animação/tempo estiver em andamento
           if (el.dataset.locked === 'true') return;
           el.dataset.locked = 'true';
           el.src = 'maof.png';
-          // volta ao estado original após 500ms
-          const timeoutId = setTimeout(() => {
+          handleAttack(seqdImage).finally(() => {
             el.src = 'maoa.png';
             el.dataset.locked = 'false';
-            delete el.dataset._atkTimeout;
-          }, 500);
-          // guarda o id caso precise limpar futuramente
-          el.dataset._atkTimeout = timeoutId;
+          });
         });
 
-        // Cria o botão de magia com forma de imagem (maof.png) na posição x:500, y:1200
         const botmag = document.createElement('img');
         botmag.id = 'botmag';
         botmag.src = 'maof.png';
         botmag.alt = 'Botão de magia';
-        // mantemos a classe character para que seja removido junto com outros overlays quando necessário
         botmag.className = 'character';
-        // estilos já definidos em CSS via #botmag, mas garantimos as posições caso CSS não carregue
         botmag.style.left = '500px';
         botmag.style.top = '1200px';
         botmag.style.width = '80px';
@@ -337,28 +546,20 @@
         botmag.style.zIndex = '25';
         gameContainer.appendChild(botmag);
 
-        // Ao pressionar (click) muda a forma para maor.png e retorna para maof.png após 500ms
         botmag.addEventListener('click', function() {
           const el = this;
-          // evita clicar várias vezes enquanto a animação/tempo estiver em andamento
           if (el.dataset.locked === 'true') return;
           el.dataset.locked = 'true';
           el.src = 'maor.png';
-          // volta ao estado original após 500ms
-          const timeoutId = setTimeout(() => {
+          setTimeout(() => {
             el.src = 'maof.png';
             el.dataset.locked = 'false';
-            delete el.dataset._magTimeout;
           }, 500);
-          // guarda o id caso precise limpar futuramente
-          el.dataset._magTimeout = timeoutId;
         });
 
-        // Desabilita o scroll adicionando a classe ao body
         document.body.classList.add('game-active');
-
-        // (Opcional) você pode usar maor.png para um estado alternativo quando quiser — já está pré-carregada
-
+        updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
+        updateHp(bossvitFill, game.bossvit, game.maxBossvit);
       } catch (error) {
         console.error('Erro ao carregar imagens:', error);
         loadingGaugeContainer.classList.remove('active');
