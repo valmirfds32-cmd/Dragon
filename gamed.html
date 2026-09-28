@@ -201,6 +201,14 @@
       border-radius: 10px;
       border: 2px solid;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .hp-gauge.visible {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .hp-gauge-title {
@@ -263,6 +271,14 @@
       padding: 8px 14px;
       border-radius: 8px;
       z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .dice-label.visible {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     #dado1 { top: 500px; }
@@ -370,6 +386,8 @@
     const dado2Label = document.getElementById('dado2');
     const endScreen = document.getElementById('endScreen');
     const endScreenText = document.getElementById('endScreenText');
+    const meuvitGauge = document.getElementById('meuvit');
+    const bossvitGauge = document.getElementById('bossvit');
 
     let game = {
       meuvit: 3000,
@@ -556,6 +574,11 @@
             el.dataset.locked = 'false';
           }, 500);
         });
+
+        meuvitGauge.classList.add('visible');
+        bossvitGauge.classList.add('visible');
+        dado1Label.classList.add('visible');
+        dado2Label.classList.add('visible');
 
         document.body.classList.add('game-active');
         updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
