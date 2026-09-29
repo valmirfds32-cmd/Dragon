@@ -554,23 +554,25 @@
       await new Promise(resolve => setTimeout(resolve, 300));
 
       if (dadobos > dadomeu) {
-        let damage = 0;
-
-        if (dadobos === 5 || dadobos === 6) {
-          damage = 50;
-        } else if (dadobos === 3 || dadobos === 4) {
-          // Não causa dano, apenas reduz magia
-          damage = 0;
-        }
-
-        if (damage > 0) {
-          game.meuvit = Math.max(0, game.meuvit - damage);
+        // Se dadobos é 3 ou 4 e maior que dadomeu
+        if (dadobos === 3 || dadobos === 4) {
+          // Tira 100 de vitalidade
+          game.meuvit = Math.max(0, game.meuvit - 100);
           updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
           flashScreen();
-        }
-
-        // Reduz magia do boss quando dadobos é 3, 4, 5 ou 6
-        if (dadobos === 3 || dadobos === 4 || dadobos === 5 || dadobos === 6) {
+          
+          // Reduz 1 de magia do boss
+          game.bossmag = Math.max(0, game.bossmag - 1);
+          updateMag(bossmagFill, game.bossmag, game.maxBossmag);
+        } 
+        // Se dadobos é 5 ou 6
+        else if (dadobos === 5 || dadobos === 6) {
+          // Tira 50 de vitalidade
+          game.meuvit = Math.max(0, game.meuvit - 50);
+          updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
+          flashScreen();
+          
+          // Reduz 1 de magia do boss
           game.bossmag = Math.max(0, game.bossmag - 1);
           updateMag(bossmagFill, game.bossmag, game.maxBossmag);
         }
