@@ -100,6 +100,7 @@
       width: auto;
       height: auto;
       z-index: 5;
+      transition: top 0.3s ease;
     }
 
     .cave-overlay {
@@ -545,6 +546,9 @@
       if (game.gameEnded || game.turnLocked) return;
       game.turnLocked = true;
 
+      // Move o personagem para y 300
+      seqdImage.style.top = '300px';
+
       const dadomeu = rollDice();
       const dadobos = rollDice();
 
@@ -584,6 +588,10 @@
       } else if (game.bossvit <= 0) {
         endGame(true);
       }
+
+      // Retorna o personagem à posição original
+      await new Promise(resolve => setTimeout(resolve, 500));
+      seqdImage.style.top = '-3000px';
 
       game.turnLocked = false;
     }
