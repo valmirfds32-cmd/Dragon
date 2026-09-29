@@ -571,10 +571,6 @@
           game.meuvit = Math.max(0, game.meuvit - 50);
           updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
           flashScreen();
-          
-          // Reduz 1 de magia do boss
-          game.bossmag = Math.max(0, game.bossmag - 1);
-          updateMag(bossmagFill, game.bossmag, game.maxBossmag);
         }
       } else if (dadomeu > dadobos) {
         const damage = Math.floor(Math.random() * 51) + 50;
