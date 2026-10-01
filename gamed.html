@@ -2,13 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, minimum-scale=1, viewport-fit=cover">
   <title>Jogo dos Dragões</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      touch-action: none;
     }
 
     body {
@@ -20,6 +21,9 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
 
     body.game-active {
@@ -70,6 +74,7 @@
       border-radius: 8px;
       cursor: pointer;
       transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+      touch-action: manipulation;
     }
 
     .btn-play {
@@ -177,6 +182,8 @@
       z-index: 25;
       cursor: pointer;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
     }
 
     /* Estilo específico para o botão de magia (imagem) */
@@ -189,6 +196,8 @@
       z-index: 25;
       cursor: pointer;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
     }
 
     /* Gauges de vitalidade */
@@ -204,6 +213,7 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
+      touch-action: none;
     }
 
     .hp-gauge.visible {
@@ -273,6 +283,7 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
+      touch-action: none;
     }
 
     .mag-gauge.visible {
@@ -343,6 +354,7 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
+      touch-action: none;
     }
 
     .dice-label.visible {
@@ -379,6 +391,7 @@
       justify-content: center;
       background: rgba(0, 0, 0, 0.78);
       z-index: 50;
+      touch-action: none;
     }
 
     .end-screen.active {
@@ -452,6 +465,26 @@
   </div>
 
   <script>
+    // Desabilitar zoom por pinch e double-tap
+    document.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    let lastTouchTime = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchTime < 500 && e.touches.length === 0) {
+        e.preventDefault();
+      }
+      lastTouchTime = now;
+    }, { passive: false });
+
     const playBtn = document.getElementById('playBtn');
     const gameContainer = document.getElementById('gameContainer');
     const mainImage = document.getElementById('mainImage');
@@ -530,7 +563,7 @@
       endScreen.classList.add('active');
       if (won) {
         seqdImage.style.transition = 'none';
-      seqdImage.style.top = '-3000px';
+        seqdImage.style.top = '-3000px';
         endScreen.classList.add('won');
         endScreenText.textContent = 'Você ganhou';
       } else {
@@ -547,7 +580,7 @@
       if (game.gameEnded || game.turnLocked) return;
       game.turnLocked = true;
 
-      // Move o personagem diretamente para y 300 sem transição
+      // Move o personagem diretamente para y 400 sem transição
       seqdImage.style.transition = 'none';
       seqdImage.style.top = '400px';
 
@@ -575,7 +608,7 @@
         else if (dadobos === 5 || dadobos === 6) {
           // Tira 50 de vitalidade
           seqdImage.style.transition = 'none';
-      seqdImage.style.top = '-480px';
+          seqdImage.style.top = '-480px';
           game.meuvit = Math.max(0, game.meuvit - 50);
           updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
           flashScreen();
@@ -587,10 +620,11 @@
         flashCharacterRed(seqdImage);
       }
 
-      if (game.meuvit <= 0) {
-        endGame(false);
-      } else if (game.bossvit <= 0) {
+      // Verificar condição de vitória ANTES de condição de derrota
+      if (game.bossvit <= 0) {
         endGame(true);
+      } else if (game.meuvit <= 0) {
+        endGame(false);
       }
 
       game.turnLocked = false;
