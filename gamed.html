@@ -562,8 +562,6 @@
       game.gameEnded = true;
       endScreen.classList.add('active');
       if (won) {
-        //seqdImage.style.transition = 'none';
-        //seqdImage.style.top = '-3000px';
         endScreen.classList.add('won');
         endScreenText.textContent = 'Você ganhou';
       } else {
@@ -622,6 +620,8 @@
 
       // Verificar condição de vitória ANTES de condição de derrota
       if (game.bossvit <= 0) {
+        seqdImage.style.transition = 'none';
+        seqdImage.style.top = '-3000px';
         endGame(true);
       } else if (game.meuvit <= 0) {
         endGame(false);
