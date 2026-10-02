@@ -594,7 +594,7 @@
         // Se dadobos é 3 ou 4 e maior que dadomeu
         if (dadobos === 3 || dadobos === 4) {
           // Tira 100 de vitalidade
-          game.meuvit = Math.max(0, game.meuvit - 100);
+          game.meuvit = Math.max(0, game.meuvit - 500);
           updateHp(meuvitFill, game.meuvit, game.maxMeuvit);
           flashScreen();
           
@@ -613,7 +613,7 @@
         }
       } else if (dadomeu > dadobos) {
         //const damage = Math.floor(Math.random() * 51) + 50;
-        game.bossvit = Math.max(0, game.bossvit - 1000);
+        game.bossvit = Math.max(0, game.bossvit - 100);
         updateHp(bossvitFill, game.bossvit, game.maxBossvit);
         flashCharacterRed(seqdImage);
       }
